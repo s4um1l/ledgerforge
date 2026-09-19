@@ -130,6 +130,134 @@ def test_invoice_tolerance_ignores_cases_with_no_purchase_order():
     )
 
 
+def test_invoice_tolerance_reviews_a_zero_amount_purchase_order():
+    """R09: a blanket PO carrying no amount cannot satisfy the percentage test."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {
+                "number": "PO-1100",
+                "amount": 0.0,
+                "note": "blanket order, amount agreed per release",
+            },
+            "invoice": {"number": "INV-8901", "amount": 50.0, "vendor": "Cloudspan"},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_reviews_a_negative_purchase_order_amount():
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1101", "amount": -500.0},
+            "invoice": {"number": "INV-8902", "amount": 50.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_reviews_a_purchase_order_with_no_amount_key():
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1102", "note": "blanket order"},
+            "invoice": {"number": "INV-8903", "amount": 50.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+@pytest.mark.parametrize("amount", ["TBD", "1,200.00"])
+def test_invoice_tolerance_reviews_a_non_numeric_invoice_amount(amount):
+    """A present-but-incomparable amount must not slip through, or crash."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1103", "amount": 10000.0},
+            "invoice": {"number": "INV-8904", "amount": amount},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+    assert repr(amount) in verdict.reason
+
+
+def test_invoice_tolerance_reviews_a_boolean_purchase_order_amount():
+    """`isinstance(True, int)` must not let a bool through as the number 1."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1104", "amount": True},
+            "invoice": {"number": "INV-8905", "amount": 1.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_reviews_a_boolean_invoice_amount():
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1105", "amount": 1.0},
+            "invoice": {"number": "INV-8906", "amount": True},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_still_ignores_a_case_with_no_purchase_order_key():
+    """Non-three-way-match cases stay untouched by the fail-closed rules."""
+    assert (
+        invoice_tolerance.check(
+            {"bank_line": {"amount": 500, "memo": "ACH"}, "invoice": {"amount": 480}},
+            Action.AUTO,
+        )
+        is None
+    )
+
+
+def test_invoice_tolerance_ignores_a_purchase_order_with_no_invoice_amount():
+    """An absent invoice figure is deliberately not in this control's remit."""
+    assert (
+        invoice_tolerance.check(
+            {
+                "purchase_order": {"number": "PO-1106", "amount": 10000.0},
+                "invoice": {"number": "INV-8907", "vendor": "Cloudspan"},
+            },
+            Action.AUTO,
+        )
+        is None
+    )
+
+
+def test_invoice_tolerance_auto_approves_a_real_purchase_order_inside_both_limits():
+    """$50 and 0.5% against a real PO still auto-approves after the restructure."""
+    assert (
+        invoice_tolerance.check(
+            {
+                "purchase_order": {"number": "PO-1107", "amount": 10000.0},
+                "invoice": {"number": "INV-8908", "amount": 10050.0},
+            },
+            Action.AUTO,
+        )
+        is None
+    )
+
+
+def test_invoice_tolerance_limits_are_inclusive_at_the_boundary():
+    """Exactly $100 and exactly 1% is inside tolerance, not over it."""
+    assert (
+        invoice_tolerance.check(
+            {
+                "purchase_order": {"number": "PO-1108", "amount": 10000.0},
+                "invoice": {"number": "INV-8909", "amount": 10100.0},
+            },
+            Action.AUTO,
+        )
+        is None
+    )
+
+
 def test_most_restrictive_verdict_wins():
     action, verdicts = apply_controls(
         {
