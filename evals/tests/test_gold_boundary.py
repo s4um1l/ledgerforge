@@ -33,7 +33,17 @@ def test_loaders_refuse_to_be_pointed_at_gold():
 
 
 def factory_sources() -> list[pathlib.Path]:
-    return [p for p in (REPO_ROOT / "factory").rglob("*.py")]
+    """Production factory modules.
+
+    `factory/tests/` is excluded on purpose: a test asserting that the factory
+    cannot reach the answers has to be able to name them. Excluding the tests is
+    what keeps the check meaningful rather than self-satisfied.
+    """
+    return [
+        path
+        for path in (REPO_ROOT / "factory").rglob("*.py")
+        if "tests" not in path.relative_to(REPO_ROOT).parts
+    ]
 
 
 def test_no_factory_module_reaches_for_gold():
@@ -43,3 +53,10 @@ def test_no_factory_module_reaches_for_gold():
         if "evals.gold" in text or "benchmark/gold" in text or "answers.jsonl" in text:
             offenders.append(path.relative_to(REPO_ROOT))
     assert offenders == [], f"factory modules must not reference gold: {offenders}"
+
+
+def test_the_boundary_check_actually_inspects_something():
+    """Guards against the check passing because it found no files to look at."""
+    sources = factory_sources()
+    assert len(sources) >= 10
+    assert any(p.name == "context.py" for p in sources)

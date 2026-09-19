@@ -63,9 +63,15 @@ def decide(
         failed = validation.unit_tests.failed if validation.unit_tests else "?"
         reasons.append(f"{failed} unit test(s) failing")
     if not gates["target_case_passes"]:
-        reasons.append(
-            f"target case {target.case} still fails" if target else "no target case evidence"
-        )
+        if target:
+            reasons.append(f"target case {target.case} still fails")
+        elif validation.error:
+            reasons.append(
+                f"target case never evaluated: validation stopped at "
+                f"{validation.stage_reached} ({validation.error})"
+            )
+        else:
+            reasons.append("no target case evidence")
     if not gates["within_regression_policy"]:
         reasons.append(
             f"{len(validation.regressions)} regression(s) against a policy of "
@@ -195,7 +201,10 @@ class FactoryRun:
         if self.dry_run:
             print("  dry run: stopping after planning")
             self.decision = Decision(
-                accepted=False, state=State.PLANNED, gates={}, blocking_reasons=["dry run"]
+                accepted=False,
+                state=State.PLANNED,
+                gates={},
+                blocking_reasons=["stopped before building, as requested"],
             )
             self.trace.write_model("result.json", self.decision)
             self._finish_metadata(State.PLANNED)
@@ -277,7 +286,10 @@ def run_factory(
 
 def format_decision(decision: Decision, trace: Trace, validation: ValidationResult | None) -> str:
     lines = ["", "=" * 68]
-    verdict = "ACCEPT" if decision.accepted else f"REJECT ({decision.state})"
+    if decision.state is State.PLANNED:
+        verdict = "DRY RUN — stopped after planning"
+    else:
+        verdict = "ACCEPT" if decision.accepted else f"REJECT ({decision.state})"
     lines.append(f"  {verdict}")
     lines.append("=" * 68)
 

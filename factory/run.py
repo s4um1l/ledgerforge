@@ -50,6 +50,8 @@ def main(argv: list[str] | None = None) -> int:
 
     assert run.trace is not None
     print(format_decision(decision, run.trace, run.validation))
+    if args.dry_run:
+        return 0
     return 0 if decision.accepted else 1
 
 
