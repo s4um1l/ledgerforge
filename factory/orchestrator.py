@@ -107,11 +107,13 @@ class FactoryRun:
         dry_run: bool = False,
         keep_on_reject: bool = False,
         require_clean_tree: bool = True,
+        builder_backend: str | None = None,
     ) -> None:
         self.task_path = task_path
         self.dry_run = dry_run
         self.keep_on_reject = keep_on_reject
         self.require_clean_tree = require_clean_tree
+        self.builder_backend = builder_backend or builder.DEFAULT_BACKEND
 
         self.states: list[State] = []
         self.item: WorkItem | None = None
@@ -158,7 +160,7 @@ class FactoryRun:
             task_id=item.id,
             git_sha_before=baseline_sha,
             planner_model=planner.MODEL,
-            builder_model=builder.MODEL,
+            builder_model=builder.MODELS.get(self.builder_backend, self.builder_backend),
             reviewer_model=reviewer.MODEL,
             started_at=dt.datetime.now(dt.UTC).isoformat(),
         )
@@ -212,10 +214,16 @@ class FactoryRun:
 
         # --- build -------------------------------------------------------
         try:
-            build = builder.build(item, self.plan)
+            build = builder.build(item, self.plan, package, backend=self.builder_backend)
         except builder.BuildError as exc:
             raise self.fail(State.FAILED_BUILD, str(exc)) from exc
         self.trace.write_model("builder.json", build)
+        if builder.last_call:
+            call = builder.last_call
+            self.metadata.builder_model = call.model
+            self.metadata.tokens["builder"] = call.tokens
+            self.metadata.estimated_cost["builder"] = call.cost_usd
+            self.trace.write_json("builder_call.json", call.metadata())
         diff = git.write_patch(self.trace.dir / "diff.patch")
         if not diff.strip():
             raise self.fail(State.FAILED_BUILD, "builder produced no diff")
@@ -272,12 +280,14 @@ def run_factory(
     dry_run: bool = False,
     keep_on_reject: bool = False,
     require_clean_tree: bool = True,
+    builder_backend: str | None = None,
 ) -> tuple[Decision, Trace]:
     run = FactoryRun(
         task_path,
         dry_run=dry_run,
         keep_on_reject=keep_on_reject,
         require_clean_tree=require_clean_tree,
+        builder_backend=builder_backend,
     )
     decision = run.execute()
     assert run.trace is not None

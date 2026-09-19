@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read(./product/**)",
+      "Read(./benchmark/cases/**)",
+      "Read(./benchmark/world/**)",
+      "Read(./prompts/**)",
+      "Read(./pyproject.toml)",
+      "Edit(./product/**)",
+      "Write(./product/**)",
+      "Glob(./product/**)",
+      "Grep(./product/**)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv run ruff:*)",
+      "Bash(uv run python scripts/run_agent.py:*)"
+    ],
+    "deny": [
+      "Read(./benchmark/gold/**)",
+      "Glob(./benchmark/gold/**)",
+      "Grep(./benchmark/gold/**)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(less:*)",
+      "Bash(grep:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(uv run python -c:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

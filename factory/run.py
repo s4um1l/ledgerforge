@@ -27,6 +27,11 @@ def main(argv: list[str] | None = None) -> int:
         help="leave a rejected change in the working tree instead of reverting it",
     )
     parser.add_argument(
+        "--builder",
+        choices=["scripted", "claude-code"],
+        help="which builder to use (default: $FACTORY_BUILDER, else scripted)",
+    )
+    parser.add_argument(
         "--allow-dirty",
         action="store_true",
         help="run even with uncommitted changes (the diff will not be trustworthy)",
@@ -38,6 +43,7 @@ def main(argv: list[str] | None = None) -> int:
         dry_run=args.dry_run,
         keep_on_reject=args.keep_on_reject,
         require_clean_tree=not args.allow_dirty,
+        builder_backend=args.builder,
     )
 
     try:

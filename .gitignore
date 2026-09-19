@@ -13,6 +13,7 @@ __pycache__/
 # env / secrets
 .env
 .env.*
+!.env.example
 
 # factory + eval output (keep the directories, ignore the contents)
 factory/traces/*
