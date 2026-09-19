@@ -78,6 +78,7 @@ class RunRecord(BaseModel):
     latency_ms: float | None = None
     cost_usd: float | None = None
     judgments: dict[str, float] | None = None
+    controls_fired: list[str] = Field(default_factory=list)
 
 
 class CaseResult(BaseModel):
