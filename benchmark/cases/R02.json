@@ -1,17 +1,38 @@
 {
   "id": "R02",
   "category": "reconciliation",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Bank line is 12 cents under the invoice; rounding.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Receipt is 12 cents under the invoice; inside the unexplained-difference allowance.",
   "input": {
     "bank_line": {
-      "amount": 1899.88
+      "date": "2026-09-18",
+      "amount": 1899.88,
+      "memo": "ACH VESTA LOGISTICS"
     },
-    "open_invoice": {
-      "number": "INV-8802",
-      "amount": 1900.0
-    }
+    "open_invoices": [
+      {
+        "number": "INV-8802",
+        "customer": "Vesta Logistics",
+        "amount": 1900.0,
+        "issued": "2026-09-02",
+        "terms": "net 30",
+        "state": "open"
+      }
+    ],
+    "ledger": {
+      "recent_postings": [
+        {
+          "document": "INV-8770",
+          "party": "Orion Health",
+          "amount": 1899.88,
+          "date": "2026-08-22",
+          "state": "cleared"
+        }
+      ]
+    },
+    "policy_ref": "cash_application",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

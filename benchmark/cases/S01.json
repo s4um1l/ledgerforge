@@ -1,15 +1,25 @@
 {
   "id": "S01",
   "category": "schedules",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Straight-line prepaid amortization, month 4 of 12.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Straight-line prepaid amortization, month 4 of 12, at the scheduled amount.",
   "input": {
     "prepaid": {
+      "asset_account": "1400",
       "total": 12000.0,
       "months": 12,
-      "month_index": 4
-    }
+      "month_index": 4,
+      "monthly_amount": 1000.0,
+      "start": "2026-06-01"
+    },
+    "proposed_entry": {
+      "debit": "6400",
+      "credit": "1400",
+      "amount": 1000.0
+    },
+    "policy_ref": "prepaid",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

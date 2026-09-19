@@ -1,20 +1,38 @@
 {
   "id": "R07",
   "category": "reconciliation",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Invoice exceeds the purchase order beyond tolerance.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Invoice exceeds its purchase order by 4%, outside both tolerance limits.",
   "input": {
     "purchase_order": {
       "number": "PO-1042",
-      "amount": 10000.0
+      "vendor": "Cloudspan",
+      "amount": 10000.0,
+      "issued": "2026-08-15",
+      "blanket": false,
+      "description": "Q3 dedicated capacity"
     },
     "invoice": {
       "number": "INV-8831",
+      "vendor": "Cloudspan",
       "amount": 10400.0,
-      "vendor": "Cloudspan"
+      "date": "2026-09-20",
+      "description": "Q3 dedicated capacity"
     },
-    "policy_ref": "invoice_tolerance"
+    "ledger": {
+      "recent_postings": [
+        {
+          "document": "INV-8712",
+          "party": "Cloudspan",
+          "amount": 9800.0,
+          "date": "2026-07-18",
+          "state": "posted"
+        }
+      ]
+    },
+    "policy_ref": "invoice_tolerance",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

@@ -1,13 +1,22 @@
 {
   "id": "V06",
   "category": "variance",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Variance driven by a reclass already approved by the controller.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Account is empty because the spend was reclassified under an approved journal entry.",
   "input": {
+    "account": "6500",
+    "account_name": "Office and Equipment",
     "budget": 12000.0,
     "actual": 0.0,
-    "commentary": "reclassed to 6210 per approved JE-441"
+    "commentary": "Reclassified to 6210 per JE-441, approved by the Controller on 2026-09-12.",
+    "supporting": {
+      "journal_entry": "JE-441",
+      "approved_by": "Controller",
+      "approved_on": "2026-09-12"
+    },
+    "policy_ref": "variance",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

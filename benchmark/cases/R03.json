@@ -1,23 +1,54 @@
 {
   "id": "R03",
   "category": "reconciliation",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Two invoices plausibly sum to one deposit.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "A deposit that two different invoice combinations could explain, and one of them was already applied.",
   "input": {
     "bank_line": {
-      "amount": 7300.0
+      "date": "2026-09-22",
+      "amount": 7300.0,
+      "memo": "ACH ORION HEALTH"
     },
     "open_invoices": [
       {
         "number": "INV-8803",
-        "amount": 3100.0
+        "customer": "Orion Health",
+        "amount": 3100.0,
+        "state": "open"
       },
       {
         "number": "INV-8804",
-        "amount": 4200.0
+        "customer": "Orion Health",
+        "amount": 4200.0,
+        "state": "open"
+      },
+      {
+        "number": "INV-8805",
+        "customer": "Orion Health",
+        "amount": 2800.0,
+        "state": "open"
+      },
+      {
+        "number": "INV-8807",
+        "customer": "Orion Health",
+        "amount": 4500.0,
+        "state": "open"
       }
-    ]
+    ],
+    "ledger": {
+      "recent_postings": [
+        {
+          "document": "INV-8803",
+          "party": "Orion Health",
+          "amount": 3100.0,
+          "date": "2026-09-19",
+          "state": "cleared"
+        }
+      ]
+    },
+    "remittance": null,
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

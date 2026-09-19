@@ -1,14 +1,25 @@
 {
   "id": "S05",
   "category": "schedules",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Deferred revenue release for a completed milestone.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Deferred revenue released on an accepted, signed milestone.",
   "input": {
     "contract": {
-      "milestone": "phase 2 accepted 2026-09-14",
+      "customer": "Calder Group",
+      "number": "CTR-2025-04",
+      "signed": true,
+      "milestone": "Phase 2",
+      "accepted_on": "2026-09-14",
       "amount": 45000.0
-    }
+    },
+    "proposed_entry": {
+      "debit": "2200",
+      "credit": "4100",
+      "amount": 45000.0
+    },
+    "policy_ref": "revenue_recognition",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

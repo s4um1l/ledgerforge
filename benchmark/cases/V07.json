@@ -1,13 +1,18 @@
 {
   "id": "V07",
   "category": "variance",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Budget figure itself looks wrong; upstream data issue.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "The budget figure itself is missing, so no variance can be computed.",
   "input": {
+    "account": "6300",
+    "account_name": "Contract Labor",
     "budget": 0.0,
     "actual": 61000.0,
-    "account": "6300 Contractors"
+    "commentary": null,
+    "note": "budget upload for this account failed on 2026-09-01",
+    "policy_ref": "variance",
+    "period": "2026-09"
   },
   "candidate_action": "REVIEW"
 }

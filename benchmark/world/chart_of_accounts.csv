@@ -1,0 +1,27 @@
+account,name,type,normal_balance,capitalizable,notes
+1000,Operating Cash,asset,debit,no,primary operating account
+1010,Payroll Cash,asset,debit,no,funded per pay cycle
+1200,Accounts Receivable,asset,debit,no,
+1250,Allowance for Doubtful Accounts,asset,credit,no,contra asset
+1400,Prepaid Expenses,asset,debit,no,insurance and annual software
+1500,Fixed Assets - Computer Equipment,asset,debit,yes,36 month useful life
+1510,Fixed Assets - Furniture,asset,debit,yes,60 month useful life
+1590,Accumulated Depreciation,asset,credit,no,contra asset
+2000,Accounts Payable,liability,credit,no,
+2100,Accrued Liabilities,liability,credit,no,month-end accruals
+2200,Deferred Revenue,liability,credit,no,released on delivery or milestone
+3000,Common Stock,equity,credit,no,
+3900,Retained Earnings,equity,credit,no,
+4000,Subscription Revenue,revenue,credit,no,recognized ratably
+4100,Services Revenue,revenue,credit,no,recognized on milestone acceptance
+5000,Cost of Revenue - Hosting,expense,debit,no,
+5100,Cost of Revenue - Support,expense,debit,no,
+6000,Salaries and Wages,expense,debit,no,
+6100,Marketing,expense,debit,no,
+6200,Software Subscriptions,expense,debit,no,under capitalization threshold
+6210,Professional Fees,expense,debit,no,legal and accounting
+6300,Contract Labor,expense,debit,no,staffing agencies
+6400,Insurance,expense,debit,no,amortized from prepaid
+6500,Office and Equipment,expense,debit,no,below capitalization threshold only
+6600,Travel and Entertainment,expense,debit,no,receipt required over 75
+6900,Depreciation,expense,debit,no,

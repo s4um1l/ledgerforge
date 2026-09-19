@@ -1,14 +1,24 @@
 {
   "id": "S06",
   "category": "schedules",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Revenue recognition on an unsigned order form.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Revenue recognition proposed on an unsigned order form.",
   "input": {
     "contract": {
+      "customer": "Tallgrass Foods",
+      "number": "CTR-2026-19",
       "signed": false,
+      "amount": 60000.0,
+      "note": "order form sent 2026-09-25, countersignature pending"
+    },
+    "proposed_entry": {
+      "debit": "1200",
+      "credit": "4000",
       "amount": 60000.0
-    }
+    },
+    "policy_ref": "revenue_recognition",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

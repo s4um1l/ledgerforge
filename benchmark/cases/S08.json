@@ -1,15 +1,34 @@
 {
   "id": "S08",
   "category": "schedules",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Reversal of a prior-month accrual, amounts agree.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Reversal of a prior-month accrual that the ledger shows was already reversed.",
   "input": {
     "reversal": {
-      "of": "JE-402",
+      "of_journal_entry": "JE-402",
       "amount": 8000.0,
-      "original_amount": 8000.0
-    }
+      "original_amount": 8000.0,
+      "original_period": "2026-08"
+    },
+    "proposed_entry": {
+      "debit": "2100",
+      "credit": "6300",
+      "amount": 8000.0
+    },
+    "ledger": {
+      "recent_postings": [
+        {
+          "document": "JE-402R",
+          "party": "Meridian Staffing",
+          "amount": 8000.0,
+          "date": "2026-09-05",
+          "state": "posted"
+        }
+      ]
+    },
+    "policy_ref": "duplicates",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

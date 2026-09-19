@@ -1,18 +1,31 @@
 {
   "id": "R08",
   "category": "reconciliation",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Duplicate vendor invoice submitted twice in one week.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "The same vendor invoice arrived twice, once by portal and once by email.",
   "input": {
     "invoice": {
       "number": "INV-8840",
+      "vendor": "Brightline Legal",
       "amount": 1250.0,
-      "vendor": "Brightline"
+      "date": "2026-09-02",
+      "received_via": "email",
+      "description": "August matters"
     },
     "ledger": {
-      "INV-8840": "posted 2026-09-02"
-    }
+      "recent_postings": [
+        {
+          "document": "INV-8840",
+          "party": "Brightline Legal",
+          "amount": 1250.0,
+          "date": "2026-09-02",
+          "state": "posted"
+        }
+      ]
+    },
+    "policy_ref": "duplicates",
+    "period": "2026-09"
   },
   "candidate_action": "REVIEW"
 }

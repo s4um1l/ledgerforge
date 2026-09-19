@@ -1,18 +1,42 @@
 {
   "id": "R01",
   "category": "reconciliation",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Bank line matches a single open invoice exactly.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "ACH receipt matches one open invoice exactly; an identical amount was received last month, legitimately.",
   "input": {
     "bank_line": {
+      "date": "2026-09-14",
       "amount": 4200.0,
-      "memo": "ACH NORTHWIND"
+      "memo": "ACH NORTHWIND TRADING INV-8801"
     },
-    "open_invoice": {
-      "number": "INV-8801",
+    "open_invoices": [
+      {
+        "number": "INV-8801",
+        "customer": "Northwind Trading",
+        "amount": 4200.0,
+        "issued": "2026-09-01",
+        "terms": "net 30",
+        "state": "open"
+      }
+    ],
+    "ledger": {
+      "recent_postings": [
+        {
+          "document": "INV-8790",
+          "party": "Northwind Trading",
+          "amount": 4200.0,
+          "date": "2026-08-14",
+          "state": "cleared"
+        }
+      ]
+    },
+    "proposed_entry": {
+      "debit": "1000",
+      "credit": "1200",
       "amount": 4200.0
-    }
+    },
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

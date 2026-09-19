@@ -1,15 +1,20 @@
 {
   "id": "R04",
   "category": "reconciliation",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Deposit has no matching invoice at all.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Incoming wire with no identifiable payer and no open invoice at that amount.",
   "input": {
     "bank_line": {
+      "date": "2026-09-25",
       "amount": 950.0,
-      "memo": "WIRE UNKNOWN"
+      "memo": "WIRE REF 8842119 NO DETAIL"
     },
-    "open_invoices": []
+    "open_invoices": [],
+    "ledger": {
+      "recent_postings": []
+    },
+    "period": "2026-09"
   },
   "candidate_action": "REVIEW"
 }

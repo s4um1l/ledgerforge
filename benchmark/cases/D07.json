@@ -1,14 +1,35 @@
 {
   "id": "D07",
   "category": "data_entry",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Expense coded to an account not in the chart of accounts.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Same vendor, same amount, different invoice number, eight days apart.",
   "input": {
-    "expense": {
-      "amount": 220.0,
-      "account": "6999-UNKNOWN"
-    }
+    "invoice": {
+      "number": "BL-5512",
+      "vendor": "Brightline Legal",
+      "amount": 4850.0,
+      "date": "2026-09-16",
+      "description": "September retainer"
+    },
+    "proposed_entry": {
+      "debit": "6210",
+      "credit": "2000",
+      "amount": 4850.0
+    },
+    "ledger": {
+      "recent_postings": [
+        {
+          "document": "BL-5498",
+          "party": "Brightline Legal",
+          "amount": 4850.0,
+          "date": "2026-09-08",
+          "state": "posted"
+        }
+      ]
+    },
+    "policy_ref": "duplicates",
+    "period": "2026-09"
   },
-  "candidate_action": "REJECT"
+  "candidate_action": "AUTO"
 }

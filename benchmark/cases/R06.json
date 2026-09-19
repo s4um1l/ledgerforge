@@ -1,18 +1,42 @@
 {
   "id": "R06",
   "category": "reconciliation",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Customer short-paid, remittance advice explains why.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Customer short-paid by $500 and the remittance advice names the credit memo; policy permits this.",
   "input": {
     "bank_line": {
-      "amount": 4000.0
+      "date": "2026-09-16",
+      "amount": 4000.0,
+      "memo": "ACH VESTA LOGISTICS RA-2291"
     },
-    "open_invoice": {
-      "number": "INV-8806",
-      "amount": 4500.0
+    "open_invoices": [
+      {
+        "number": "INV-8806",
+        "customer": "Vesta Logistics",
+        "amount": 4500.0,
+        "state": "open"
+      }
+    ],
+    "remittance": {
+      "reference": "RA-2291",
+      "applied_credit_memo": "CM-31",
+      "credit_amount": 500.0,
+      "explanation": "CM-31 issued 2026-08-20 for August service credit"
     },
-    "remittance": "500 credit memo CM-31 applied"
+    "ledger": {
+      "recent_postings": [
+        {
+          "document": "CM-31",
+          "party": "Vesta Logistics",
+          "amount": -500.0,
+          "date": "2026-08-20",
+          "state": "posted"
+        }
+      ]
+    },
+    "policy_ref": "cash_application",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

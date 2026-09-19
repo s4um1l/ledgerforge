@@ -1,18 +1,40 @@
 {
   "id": "D06",
   "category": "data_entry",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Recurring cloud bill, amount within historical range.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Usage-based cloud bill inside its normal range; last month's bill is in the ledger at a similar amount.",
   "input": {
     "invoice": {
+      "number": "AWS-2026-09",
+      "vendor": "AWS",
       "amount": 3120.44,
-      "vendor": "AWS"
+      "date": "2026-09-30",
+      "description": "September compute and storage"
+    },
+    "proposed_entry": {
+      "debit": "5000",
+      "credit": "2000",
+      "amount": 3120.44
     },
     "history": {
-      "mean": 3050.0,
-      "stdev": 120.0
-    }
+      "account": "5000",
+      "trailing_mean": 3050.0,
+      "trailing_stdev": 120.0,
+      "months": 6
+    },
+    "ledger": {
+      "recent_postings": [
+        {
+          "document": "AWS-2026-08",
+          "party": "AWS",
+          "amount": 2980.1,
+          "date": "2026-08-31",
+          "state": "posted"
+        }
+      ]
+    },
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

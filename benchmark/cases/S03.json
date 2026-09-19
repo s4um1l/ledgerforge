@@ -1,14 +1,25 @@
 {
   "id": "S03",
   "category": "schedules",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Accrual estimate with no supporting documentation.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Accrual estimate with no supporting documentation of any kind.",
   "input": {
     "accrual": {
       "amount": 25000.0,
-      "evidence": null
-    }
+      "account": "2100",
+      "description": "estimated Q3 consulting"
+    },
+    "supporting": null,
+    "proposed_entry": {
+      "debit": "6210",
+      "credit": "2100",
+      "amount": 25000.0
+    },
+    "ledger": {
+      "recent_postings": []
+    },
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

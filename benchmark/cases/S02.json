@@ -1,14 +1,33 @@
 {
   "id": "S02",
   "category": "schedules",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Accrue a known unbilled contractor invoice.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Invoice dated in October for work performed in September; policy says accrue it.",
   "input": {
-    "accrual": {
+    "invoice": {
+      "number": "MS-7741",
+      "vendor": "Meridian Staffing",
       "amount": 8000.0,
-      "evidence": "signed SOW, work completed 2026-09"
-    }
+      "date": "2026-10-03",
+      "description": "contract engineering, Sept 1-30"
+    },
+    "service_period": "2026-09-01..2026-09-30",
+    "supporting": {
+      "signed_sow": "SOW-88",
+      "timesheets_received": true,
+      "work_completed": "2026-09-30"
+    },
+    "proposed_entry": {
+      "debit": "6300",
+      "credit": "2100",
+      "amount": 8000.0
+    },
+    "ledger": {
+      "recent_postings": []
+    },
+    "policy_ref": "month_end_cutoff",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

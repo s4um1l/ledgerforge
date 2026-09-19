@@ -1,13 +1,17 @@
 {
   "id": "V01",
   "category": "variance",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Marketing spend 3% over budget; immaterial.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Marketing 3% over budget, inside both immateriality limits.",
   "input": {
+    "account": "6100",
+    "account_name": "Marketing",
     "budget": 50000.0,
     "actual": 51500.0,
-    "account": "6100 Marketing"
+    "commentary": null,
+    "policy_ref": "variance",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

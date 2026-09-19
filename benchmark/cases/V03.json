@@ -1,13 +1,21 @@
 {
   "id": "V03",
   "category": "variance",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Revenue under plan, sales commentary attached and consistent.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Revenue under plan with a single consistent explanation from sales.",
   "input": {
+    "account": "4000",
+    "account_name": "Subscription Revenue",
     "budget": 420000.0,
     "actual": 388000.0,
-    "commentary": "two enterprise deals slipped to Q4"
+    "commentary": "Two enterprise renewals slipped from September to October; both are signed as of 2026-10-02.",
+    "supporting": {
+      "crm_reference": "OPP-4471, OPP-4488",
+      "confirmed_by": "VP Sales"
+    },
+    "policy_ref": "variance",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

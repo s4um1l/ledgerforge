@@ -1,16 +1,32 @@
 {
   "id": "S04",
   "category": "schedules",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Invoice dated after month-end cutoff posted to closed period.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Invoice dated in October for work performed in October, proposed against the September close.",
   "input": {
     "invoice": {
+      "number": "PC-3312",
+      "vendor": "Pinnacle Consulting",
+      "amount": 4400.0,
       "date": "2026-10-02",
+      "description": "implementation, Oct 1-2"
+    },
+    "service_period": "2026-10-01..2026-10-02",
+    "supporting": {
+      "signed_sow": "SOW-91",
+      "work_completed": "2026-10-02"
+    },
+    "proposed_entry": {
+      "debit": "6210",
+      "credit": "2000",
       "amount": 4400.0
     },
-    "period": "2026-09",
-    "policy_ref": "month_end_cutoff"
+    "ledger": {
+      "recent_postings": []
+    },
+    "policy_ref": "month_end_cutoff",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

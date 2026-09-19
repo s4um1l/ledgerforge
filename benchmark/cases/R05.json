@@ -1,17 +1,35 @@
 {
   "id": "R05",
   "category": "reconciliation",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Same invoice number already cleared last month.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Receipt cites an invoice the ledger already shows as cleared in the prior period.",
   "input": {
     "bank_line": {
+      "date": "2026-09-09",
       "amount": 2400.0,
-      "memo": "ACH INV-8790"
+      "memo": "ACH CALDER GROUP INV-8790"
     },
+    "open_invoices": [
+      {
+        "number": "INV-8815",
+        "customer": "Calder Group",
+        "amount": 2400.0,
+        "state": "open"
+      }
+    ],
     "ledger": {
-      "INV-8790": "cleared 2026-07-31"
-    }
+      "recent_postings": [
+        {
+          "document": "INV-8790",
+          "party": "Calder Group",
+          "amount": 2400.0,
+          "date": "2026-08-31",
+          "state": "cleared"
+        }
+      ]
+    },
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

@@ -1,15 +1,27 @@
 {
   "id": "D05",
   "category": "data_entry",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Travel expense with missing itemized receipt over policy limit.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Travel expense over the policy limit with no receipt attached.",
   "input": {
     "expense": {
       "amount": 410.0,
       "category": "travel",
-      "receipt": false
-    }
+      "date": "2026-09-08",
+      "receipt": false,
+      "employee_note": "client dinner, receipt lost"
+    },
+    "proposed_entry": {
+      "debit": "6600",
+      "credit": "1000",
+      "amount": 410.0
+    },
+    "ledger": {
+      "recent_postings": []
+    },
+    "policy_ref": "expenses",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

@@ -1,14 +1,17 @@
 {
   "id": "V02",
   "category": "variance",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
+  "benchmark_version": "v0.1",
+  "scaffold": false,
   "summary": "Payroll 22% over budget with no explanation attached.",
   "input": {
+    "account": "6000",
+    "account_name": "Salaries and Wages",
     "budget": 180000.0,
     "actual": 219600.0,
-    "account": "6000 Payroll",
-    "explanation": null
+    "commentary": null,
+    "policy_ref": "variance",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

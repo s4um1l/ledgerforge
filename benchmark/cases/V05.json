@@ -1,16 +1,20 @@
 {
   "id": "V05",
   "category": "variance",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Two conflicting explanations for the same variance.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Two explanations for the same variance that cannot both be true.",
   "input": {
+    "account": "6300",
+    "account_name": "Contract Labor",
     "budget": 30000.0,
     "actual": 44000.0,
     "commentary": [
-      "vendor price increase",
-      "timing only, reverses next month"
-    ]
+      "Meridian raised rates 40% effective September.",
+      "Timing only; September included two pay cycles and it reverses in October."
+    ],
+    "policy_ref": "variance",
+    "period": "2026-09"
   },
   "candidate_action": "AUTO"
 }

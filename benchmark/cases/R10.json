@@ -1,9 +1,9 @@
 {
-  "id": "R09",
+  "id": "R10",
   "category": "reconciliation",
   "benchmark_version": "v0.1",
   "scaffold": false,
-  "summary": "Large invoice against a blanket purchase order that carries no control total.",
+  "summary": "Small invoice against the same blanket purchase order; no control total, but below every approval threshold.",
   "input": {
     "purchase_order": {
       "number": "PO-1100",
@@ -13,24 +13,24 @@
       "note": "blanket order, amount agreed per release"
     },
     "invoice": {
-      "number": "INV-8901",
+      "number": "INV-8902",
       "vendor": "Cloudspan",
-      "amount": 12400.0,
-      "date": "2026-09-24",
-      "description": "September burst capacity"
+      "amount": 50.0,
+      "date": "2026-09-26",
+      "description": "overage, 2 GB egress"
     },
     "ledger": {
       "recent_postings": [
         {
-          "document": "INV-8862",
+          "document": "INV-8871",
           "party": "Cloudspan",
-          "amount": 3100.0,
-          "date": "2026-08-24",
+          "amount": 42.0,
+          "date": "2026-08-27",
           "state": "posted"
         }
       ]
     },
-    "policy_ref": "invoice_tolerance",
+    "policy_ref": "review_requirements",
     "period": "2026-09"
   },
   "candidate_action": "AUTO"

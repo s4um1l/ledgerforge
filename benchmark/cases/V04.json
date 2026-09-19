@@ -1,13 +1,17 @@
 {
   "id": "V04",
   "category": "variance",
-  "benchmark_version": "v0.0-scaffold",
-  "scaffold": true,
-  "summary": "Cost of revenue variance explained by a one-time migration.",
+  "benchmark_version": "v0.1",
+  "scaffold": false,
+  "summary": "Hosting 15% over budget, which exceeds the general band but sits inside the wider usage-based band.",
   "input": {
+    "account": "5000",
+    "account_name": "Cost of Revenue - Hosting",
     "budget": 90000.0,
-    "actual": 118000.0,
-    "commentary": "datacenter migration, non-recurring"
+    "actual": 104000.0,
+    "commentary": "Traffic growth from the Calder rollout.",
+    "policy_ref": "variance",
+    "period": "2026-09"
   },
   "candidate_action": "REVIEW"
 }
