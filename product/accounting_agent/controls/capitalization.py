@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from product.accounting_agent.controls import service_period
 from product.accounting_agent.controls.policies import policy
 from product.accounting_agent.models import Action, ControlVerdict
 
@@ -15,6 +16,12 @@ def check(case_input: dict, proposed: Action) -> ControlVerdict | None:
     # A described purchase is one we can reason about; an amount alone is not
     # enough to call something an asset.
     if amount is None or not description:
+        return None
+
+    # A charge for services rendered across a stated period is consumed in that
+    # period and expensed under matching. It is not a candidate fixed asset, so
+    # its size is beside the point.
+    if service_period.months(case_input) is not None:
         return None
 
     threshold = policy("capitalization")["threshold"]

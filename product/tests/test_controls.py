@@ -13,6 +13,26 @@ from product.accounting_agent.controls import (
 )
 from product.accounting_agent.models import SEVERITY, Action
 
+S02_INPUT = {
+    "invoice": {
+        "number": "MS-7741",
+        "vendor": "Meridian Staffing",
+        "amount": 8000.0,
+        "date": "2026-10-03",
+        "description": "contract engineering, Sept 1-30",
+    },
+    "service_period": "2026-09-01..2026-09-30",
+    "supporting": {
+        "signed_sow": "SOW-88",
+        "timesheets_received": True,
+        "work_completed": "2026-09-30",
+    },
+    "proposed_entry": {"debit": "6300", "credit": "2100", "amount": 8000.0},
+    "ledger": {"recent_postings": []},
+    "policy_ref": "month_end_cutoff",
+    "period": "2026-09",
+}
+
 
 def test_duplicates_blocks_a_ledger_match_by_invoice_number():
     verdict = duplicates.check(
@@ -61,6 +81,182 @@ def test_cutoff_rejects_a_document_dated_after_the_period():
 def test_cutoff_allows_a_document_inside_the_period():
     inside = {"invoice": {"date": "2026-09-30"}, "period": "2026-09"}
     assert cutoff.check(inside, Action.AUTO) is None
+
+
+def test_cutoff_allows_a_document_inside_the_period_that_states_a_service_period():
+    """The in-period path is untouched: the new branch is never reached."""
+    inside = {
+        "invoice": {"date": "2026-09-28"},
+        "service_period": "2026-09-01..2026-09-30",
+        "period": "2026-09",
+    }
+    assert cutoff.check(inside, Action.AUTO) is None
+
+
+def test_cutoff_accrues_a_late_invoice_for_work_performed_in_the_period():
+    """S02: dated 2026-10-03, work done 1-30 September, so it accrues."""
+    assert cutoff.check(S02_INPUT, Action.AUTO) is None
+
+
+def test_cutoff_accrues_a_service_period_stated_as_a_dict():
+    accrual = {
+        "invoice": {"date": "2026-10-03"},
+        "service_period": {"start": "2026-09-01", "end": "2026-09-30"},
+        "period": "2026-09",
+    }
+    assert cutoff.check(accrual, Action.AUTO) is None
+
+
+def test_cutoff_accrues_a_service_period_stated_as_a_bare_month():
+    accrual = {
+        "invoice": {"date": "2026-10-03"},
+        "service_period": "2026-09",
+        "period": "2026-09",
+    }
+    assert cutoff.check(accrual, Action.AUTO) is None
+
+
+def test_cutoff_accrues_a_service_period_that_opened_before_the_closing_month():
+    accrual = {
+        "invoice": {"date": "2026-10-03"},
+        "service_period": "2026-08-15..2026-09-30",
+        "period": "2026-09",
+    }
+    assert cutoff.check(accrual, Action.AUTO) is None
+
+
+def test_cutoff_still_rejects_work_performed_after_the_cutoff():
+    """S04's shape: dated after the period and worked after it too."""
+    verdict = cutoff.check(
+        {
+            "invoice": {"number": "MS-7742", "amount": 4400.0, "date": "2026-10-02"},
+            "service_period": "2026-10-01..2026-10-02",
+            "period": "2026-09",
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REJECT
+    assert "cannot post to" in verdict.reason
+
+
+def test_cutoff_still_rejects_with_no_service_period_stated():
+    """With nothing said about the work, the invoice date is all there is."""
+    verdict = cutoff.check({"invoice": {"date": "2026-10-02"}, "period": "2026-09"}, Action.AUTO)
+    assert verdict and verdict.action is Action.REJECT
+
+
+@pytest.mark.parametrize(
+    "stated",
+    ["Q3", "sometime in September", "2026-09-01..", "2026-13", "2026-02-30", 42, True, None, []],
+)
+def test_cutoff_still_rejects_an_unparseable_service_period(stated):
+    """A period we cannot read is not a period we can accrue against."""
+    verdict = cutoff.check(
+        {"invoice": {"date": "2026-10-02"}, "service_period": stated, "period": "2026-09"},
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REJECT
+
+
+def test_cutoff_still_rejects_a_service_period_straddling_the_cutoff():
+    """Half the work falls in October, so it is not a clean September accrual."""
+    verdict = cutoff.check(
+        {
+            "invoice": {"date": "2026-10-20"},
+            "service_period": "2026-09-15..2026-10-15",
+            "period": "2026-09",
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REJECT
+
+
+def test_cutoff_still_rejects_a_service_period_wholly_before_the_period():
+    """Deliberately conservative: a prior-period item is a human's call."""
+    verdict = cutoff.check(
+        {
+            "invoice": {"date": "2026-10-02"},
+            "service_period": "2026-07-01..2026-07-31",
+            "period": "2026-09",
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REJECT
+
+
+def test_cutoff_still_rejects_an_inverted_service_period():
+    verdict = cutoff.check(
+        {
+            "invoice": {"date": "2026-10-02"},
+            "service_period": "2026-09-30..2026-09-01",
+            "period": "2026-09",
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REJECT
+
+
+def test_cutoff_still_rejects_when_the_completion_date_contradicts_the_service_period():
+    """The claim says September; the supporting evidence says October."""
+    verdict = cutoff.check(
+        {
+            "invoice": {"date": "2026-10-20"},
+            "service_period": "2026-09-01..2026-09-30",
+            "supporting": {"work_completed": "2026-10-11"},
+            "period": "2026-09",
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REJECT
+    assert "2026-10-11" in verdict.reason
+
+
+@pytest.mark.parametrize("completed", ["finished at month end", None, [], "2026-09"])
+def test_cutoff_accrues_when_the_completion_date_carries_no_contradiction(completed):
+    """Unreadable or in-period completion evidence is no signal, not a veto."""
+    accrual = {
+        "invoice": {"date": "2026-10-03"},
+        "service_period": "2026-09-01..2026-09-30",
+        "supporting": {"work_completed": completed},
+        "period": "2026-09",
+    }
+    assert cutoff.check(accrual, Action.AUTO) is None
+
+
+def test_cutoff_tolerates_a_non_mapping_supporting_block():
+    accrual = {
+        "invoice": {"date": "2026-10-03"},
+        "service_period": "2026-09-01..2026-09-30",
+        "supporting": ["SOW-88"],
+        "period": "2026-09",
+    }
+    assert cutoff.check(accrual, Action.AUTO) is None
+
+
+def test_capitalization_ignores_a_charge_for_a_stated_service_period():
+    """S02: $8,000 of labour consumed in September is an expense, not an asset."""
+    assert (
+        capitalization.check(
+            {
+                "invoice": {"amount": 8000.0, "description": "contract engineering, Sept 1-30"},
+                "service_period": "2026-09-01..2026-09-30",
+            },
+            Action.AUTO,
+        )
+        is None
+    )
+
+
+def test_capitalization_still_fires_when_the_service_period_is_unparseable():
+    """The exemption rests on a period we can actually read."""
+    verdict = capitalization.check(
+        {
+            "invoice": {"amount": 6200.00, "description": "4x MacBook Pro"},
+            "service_period": "Q3",
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
 
 
 def test_consistency_flags_contradictory_commentary():
@@ -435,6 +631,36 @@ def test_apply_controls_leaves_the_small_blanket_invoice_on_auto():
     assert verdicts == []
 
 
+def test_apply_controls_leaves_the_accrued_late_invoice_on_auto():
+    """End-to-end at the control layer, on S02's full input."""
+    action, verdicts = apply_controls(S02_INPUT, Action.AUTO)
+    assert action is Action.AUTO
+    assert verdicts == []
+
+
+def test_apply_controls_still_rejects_work_performed_after_the_period():
+    """S04's shape stays out: nothing about it was performed in September."""
+    action, verdicts = apply_controls(
+        {
+            "invoice": {
+                "number": "MS-7742",
+                "vendor": "Meridian Staffing",
+                "amount": 4400.0,
+                "date": "2026-10-02",
+                "description": "contract engineering, Oct 1-2",
+            },
+            "service_period": "2026-10-01..2026-10-02",
+            "supporting": {"signed_sow": "SOW-88", "work_completed": "2026-10-02"},
+            "ledger": {"recent_postings": []},
+            "policy_ref": "month_end_cutoff",
+            "period": "2026-09",
+        },
+        Action.AUTO,
+    )
+    assert action is Action.REJECT
+    assert [v.control for v in verdicts] == [cutoff.NAME]
+
+
 def test_most_restrictive_verdict_wins():
     action, verdicts = apply_controls(
         {
@@ -465,6 +691,7 @@ def test_controls_can_only_reduce_autonomy():
         {"invoice": {"date": "2026-12-01"}, "period": "2026-09"},
         {"commentary": ["a", "b"]},
         {"invoice": {"amount": 99999, "description": "server rack"}},
+        S02_INPUT,
     ]
     for case_input in inputs:
         for proposed in Action:
