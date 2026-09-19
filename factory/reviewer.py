@@ -11,6 +11,11 @@ Its verdict is advice. `factory.orchestrator` decides.
 
 from __future__ import annotations
 
+import json
+import os
+
+from factory import llm
+from factory.paths import PROMPTS_DIR
 from factory.schemas import (
     BuildResult,
     Plan,
@@ -20,7 +25,10 @@ from factory.schemas import (
     WorkItem,
 )
 
-MODEL = "fake:deterministic-reviewer"
+SCRIPTED_MODEL = "fake:deterministic-reviewer"
+DEFAULT_BACKEND = os.environ.get("FACTORY_REVIEWER", "scripted")
+
+last_call: llm.ModelCall | None = None
 
 # Phrases in a diff that suggest the builder made the evidence easier instead of
 # the code better.
@@ -34,7 +42,7 @@ WEAKENING_MARKERS = (
 )
 
 
-def review(
+def review_scripted(
     item: WorkItem,
     plan: Plan,
     build: BuildResult,
@@ -107,3 +115,124 @@ def review(
         concerns=concerns,
         summary=summary,
     )
+
+
+MAX_DIFF_CHARS = 60_000
+
+
+def _prompt(
+    item: WorkItem,
+    plan: Plan,
+    build: BuildResult,
+    validation: ValidationResult,
+    diff: str,
+) -> str:
+    """The task, the plan, the diff and the evidence. No answers."""
+    evidence = validation.model_dump(mode="json")
+    # The declared commands' output is noise for a reviewer and can be long.
+    for entry in evidence.get("declared_commands", []) + evidence.get("static_checks", []):
+        entry.pop("stdout_tail", None)
+        entry.pop("stderr_tail", None)
+
+    truncated = len(diff) > MAX_DIFF_CHARS
+    lines = [
+        f"# Work item {item.id}: {item.title}",
+        "",
+        f"**Intent.** {item.intent}",
+        "",
+        f"**Observed.** {item.problem.summary}",
+        "",
+        "**Acceptance criteria.**",
+        *[f"- {c}" for c in item.acceptance_criteria],
+        "",
+        "**Paths the change was allowed to touch.**",
+        *[f"- `{p}`" for p in item.scope.allowed_paths],
+        "",
+        f"**Regression policy.** At most {item.regression_policy.max_new_failures} "
+        "newly failing case(s).",
+        "",
+        "## The plan the builder worked from",
+        "",
+        "```json",
+        plan.model_dump_json(indent=2),
+        "```",
+        "",
+        "## What the builder says it did",
+        "",
+        "```json",
+        build.model_dump_json(indent=2),
+        "```",
+        "",
+        "This is the builder's own account. The diff below is what actually happened.",
+        "",
+        "## The diff",
+        "",
+        "```diff",
+        diff[:MAX_DIFF_CHARS],
+        "```",
+    ]
+    if truncated:
+        lines.append(
+            f"\n**The diff was truncated at {MAX_DIFF_CHARS:,} characters.** Treat an "
+            "unreviewably large diff as a finding in itself."
+        )
+
+    lines += [
+        "",
+        "## Validation evidence",
+        "",
+        "```json",
+        json.dumps(evidence, indent=2),
+        "```",
+    ]
+    return "\n".join(lines)
+
+
+def review_with_api(
+    item: WorkItem,
+    plan: Plan,
+    build: BuildResult,
+    validation: ValidationResult,
+    diff: str,
+) -> Review:
+    global last_call
+    system = (PROMPTS_DIR / "reviewer.md").read_text()
+    result, call = llm.run_structured(
+        _prompt(item, plan, build, validation, diff),
+        Review,
+        system=system,
+        model=llm.DEFAULT_REVIEWER_MODEL,
+    )
+    last_call = call
+    print(
+        f"  reviewer: {call.duration_seconds}s, "
+        f"${call.cost_usd:.4f} list-price equivalent ({call.model})"
+    )
+    return result
+
+
+BACKENDS = {
+    "scripted": review_scripted,
+    "api": review_with_api,
+}
+
+MODELS = {
+    "scripted": SCRIPTED_MODEL,
+    "api": llm.DEFAULT_REVIEWER_MODEL,
+}
+
+MODEL = MODELS[DEFAULT_BACKEND]
+
+
+def review(
+    item: WorkItem,
+    plan: Plan,
+    build: BuildResult,
+    validation: ValidationResult,
+    diff: str,
+    backend: str | None = None,
+) -> Review:
+    name = backend or DEFAULT_BACKEND
+    if name not in BACKENDS:
+        raise RuntimeError(f"unknown reviewer backend {name!r}; have {', '.join(BACKENDS)}")
+    return BACKENDS[name](item, plan, build, validation, diff)

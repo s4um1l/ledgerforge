@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "A software factory that turns observed product failures into verified code changes — and an accounting agent for it to build."
 requires-python = ">=3.13"
 dependencies = [
+    "anthropic>=1.7.0",
     "pydantic>=2.9",
+    "python-dotenv>=1.2.3",
     "pyyaml>=6.0",
 ]
 

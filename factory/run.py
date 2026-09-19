@@ -32,6 +32,21 @@ def main(argv: list[str] | None = None) -> int:
         help="which builder to use (default: $FACTORY_BUILDER, else scripted)",
     )
     parser.add_argument(
+        "--planner",
+        choices=["scripted", "api"],
+        help="which planner to use (default: $FACTORY_PLANNER, else scripted)",
+    )
+    parser.add_argument(
+        "--reviewer",
+        choices=["scripted", "api"],
+        help="which reviewer to use (default: $FACTORY_REVIEWER, else scripted)",
+    )
+    parser.add_argument(
+        "--all-models",
+        action="store_true",
+        help="shorthand for --builder claude-code --planner api --reviewer api",
+    )
+    parser.add_argument(
         "--allow-dirty",
         action="store_true",
         help="run even with uncommitted changes (the diff will not be trustworthy)",
@@ -43,7 +58,9 @@ def main(argv: list[str] | None = None) -> int:
         dry_run=args.dry_run,
         keep_on_reject=args.keep_on_reject,
         require_clean_tree=not args.allow_dirty,
-        builder_backend=args.builder,
+        builder_backend="claude-code" if args.all_models else args.builder,
+        planner_backend="api" if args.all_models else args.planner,
+        reviewer_backend="api" if args.all_models else args.reviewer,
     )
 
     try:

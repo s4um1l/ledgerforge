@@ -108,12 +108,16 @@ class FactoryRun:
         keep_on_reject: bool = False,
         require_clean_tree: bool = True,
         builder_backend: str | None = None,
+        planner_backend: str | None = None,
+        reviewer_backend: str | None = None,
     ) -> None:
         self.task_path = task_path
         self.dry_run = dry_run
         self.keep_on_reject = keep_on_reject
         self.require_clean_tree = require_clean_tree
         self.builder_backend = builder_backend or builder.DEFAULT_BACKEND
+        self.planner_backend = planner_backend or planner.DEFAULT_BACKEND
+        self.reviewer_backend = reviewer_backend or reviewer.DEFAULT_BACKEND
 
         self.states: list[State] = []
         self.item: WorkItem | None = None
@@ -159,9 +163,9 @@ class FactoryRun:
             run_id=run_id,
             task_id=item.id,
             git_sha_before=baseline_sha,
-            planner_model=planner.MODEL,
+            planner_model=planner.MODELS.get(self.planner_backend, self.planner_backend),
             builder_model=builder.MODELS.get(self.builder_backend, self.builder_backend),
-            reviewer_model=reviewer.MODEL,
+            reviewer_model=reviewer.MODELS.get(self.reviewer_backend, self.reviewer_backend),
             started_at=dt.datetime.now(dt.UTC).isoformat(),
         )
         print(f"run {run_id}  task {item.id}  baseline {baseline_sha[:10]}")
@@ -188,7 +192,7 @@ class FactoryRun:
 
         # --- plan --------------------------------------------------------
         try:
-            self.plan = planner.plan(item, package)
+            self.plan = planner.plan(item, package, backend=self.planner_backend)
         except planner.PlanError as exc:
             raise self.fail(State.FAILED_PLAN, str(exc)) from exc
 
@@ -198,6 +202,7 @@ class FactoryRun:
             raise self.fail(State.FAILED_PLAN, "; ".join(violations))
 
         self.trace.write_model("plan.json", self.plan)
+        self._record_call("planner", planner.last_call)
         self.enter(State.PLANNED)
 
         if self.dry_run:
@@ -218,12 +223,7 @@ class FactoryRun:
         except builder.BuildError as exc:
             raise self.fail(State.FAILED_BUILD, str(exc)) from exc
         self.trace.write_model("builder.json", build)
-        if builder.last_call:
-            call = builder.last_call
-            self.metadata.builder_model = call.model
-            self.metadata.tokens["builder"] = call.tokens
-            self.metadata.estimated_cost["builder"] = call.cost_usd
-            self.trace.write_json("builder_call.json", call.metadata())
+        self._record_call("builder", builder.last_call)
         diff = git.write_patch(self.trace.dir / "diff.patch")
         if not diff.strip():
             raise self.fail(State.FAILED_BUILD, "builder produced no diff")
@@ -244,8 +244,15 @@ class FactoryRun:
         self.enter(State.VALIDATED)
 
         # --- review ------------------------------------------------------
-        self.review = reviewer.review(item, self.plan, build, self.validation, diff)
+        try:
+            self.review = reviewer.review(
+                item, self.plan, build, self.validation, diff, backend=self.reviewer_backend
+            )
+        except (RuntimeError, ValueError) as exc:
+            # A reviewer that cannot produce a verdict is not an acceptance.
+            raise self.fail(State.REJECTED_REVIEW, f"reviewer failed: {exc}") from exc
         self.trace.write_model("review.json", self.review)
+        self._record_call("reviewer", reviewer.last_call)
         self.enter(State.REVIEWED)
 
         # --- decide ------------------------------------------------------
@@ -261,11 +268,29 @@ class FactoryRun:
         self._finish_metadata(self.decision.state)
         return self.decision
 
+    def _record_call(self, role: str, call: object | None) -> None:
+        """Account for one model call in the trace, per role.
+
+        Cost is recorded per role rather than as a single total, because
+        "the reviewer costs more than the builder" is the kind of thing that
+        should be visible rather than inferred.
+        """
+        if call is None or self.trace is None:
+            return
+        self.metadata.tokens[role] = call.tokens
+        self.metadata.estimated_cost[role] = call.cost_usd
+        if role == "builder":
+            self.metadata.builder_model = call.model
+        self.trace.write_json(f"{role}_call.json", call.metadata())
+
     def _finish_metadata(self, state: State) -> None:
         assert self.trace is not None
         self.metadata.finished_at = dt.datetime.now(dt.UTC).isoformat()
         self.metadata.duration_seconds = round(time.monotonic() - self.started, 2)
         self.metadata.states = [str(s) for s in self.states]
+        total = sum(self.metadata.estimated_cost.values())
+        if total:
+            self.metadata.estimated_cost["total"] = round(total, 6)
         self.trace.write_model("metadata.json", self.metadata)
 
 
@@ -281,6 +306,8 @@ def run_factory(
     keep_on_reject: bool = False,
     require_clean_tree: bool = True,
     builder_backend: str | None = None,
+    planner_backend: str | None = None,
+    reviewer_backend: str | None = None,
 ) -> tuple[Decision, Trace]:
     run = FactoryRun(
         task_path,
@@ -288,6 +315,8 @@ def run_factory(
         keep_on_reject=keep_on_reject,
         require_clean_tree=require_clean_tree,
         builder_backend=builder_backend,
+        planner_backend=planner_backend,
+        reviewer_backend=reviewer_backend,
     )
     decision = run.execute()
     assert run.trace is not None

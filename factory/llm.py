@@ -5,8 +5,9 @@ Two of them, for two different jobs:
 `run_claude_code` drives the Claude Code CLI as an agent — it reads files, edits
 them and runs tests inside a permission sandbox. That is the builder's job.
 
-`run_structured` (Phase 3, planner and reviewer) asks for one JSON object against a
-fixed schema and nothing else. That is a different job and wants a different tool.
+`run_structured` asks for one object against a fixed schema and nothing else. The
+planner and the reviewer are judged on the shape of what they return, so they use
+the API's structured output rather than prose that has to be salvaged.
 
 Neither is trusted. Whatever a model claims it did, the validator re-derives from
 the git diff and from running the suite.
@@ -21,12 +22,31 @@ import subprocess
 import time
 from dataclasses import dataclass, field
 
+from dotenv import load_dotenv
+from pydantic import BaseModel
+
 from factory.paths import REPO_ROOT
 
+load_dotenv(REPO_ROOT / ".env")
+
 BUILDER_SETTINGS = REPO_ROOT / "factory" / "builder_settings.json"
-DEFAULT_BUILDER_MODEL = os.environ.get("FACTORY_BUILDER_MODEL", "claude-sonnet-5")
+
+# Opus everywhere by default. Downgrading a role to save money is a decision for
+# whoever is paying, not a default buried in the factory — override per role with
+# FACTORY_BUILDER_MODEL / FACTORY_PLANNER_MODEL / FACTORY_REVIEWER_MODEL.
+DEFAULT_MODEL = "claude-opus-5"
+DEFAULT_BUILDER_MODEL = os.environ.get("FACTORY_BUILDER_MODEL", DEFAULT_MODEL)
+DEFAULT_PLANNER_MODEL = os.environ.get("FACTORY_PLANNER_MODEL", DEFAULT_MODEL)
+DEFAULT_REVIEWER_MODEL = os.environ.get("FACTORY_REVIEWER_MODEL", DEFAULT_MODEL)
 DEFAULT_MAX_TURNS = int(os.environ.get("FACTORY_MAX_TURNS", "40"))
 TIMEOUT_SECONDS = int(os.environ.get("FACTORY_MODEL_TIMEOUT", "900"))
+
+# Anthropic list prices, $ per million tokens, for the trace's cost accounting.
+PRICES = {
+    "claude-opus-5": (5.00, 25.00),
+    "claude-sonnet-5": (2.00, 10.00),
+    "claude-haiku-4-5": (1.00, 5.00),
+}
 
 
 class ModelError(RuntimeError):
@@ -177,3 +197,80 @@ def run_claude_code(
         session_id=payload.get("session_id", ""),
         permission_denials=payload.get("permission_denials") or [],
     )
+
+
+def estimate_cost(model: str, tokens: dict) -> float:
+    """List-price cost of one call. Cached reads are billed at a tenth of input."""
+    input_price, output_price = PRICES.get(model, PRICES[DEFAULT_MODEL])
+    billed_input = tokens.get("input", 0) + tokens.get("cache_creation", 0) * 1.25
+    billed_input += tokens.get("cache_read", 0) * 0.1
+    return round(
+        (billed_input * input_price + tokens.get("output", 0) * output_price) / 1_000_000,
+        6,
+    )
+
+
+def run_structured[T: BaseModel](
+    prompt: str,
+    schema: type[T],
+    system: str,
+    model: str | None = None,
+    max_tokens: int = 16000,
+) -> tuple[T, ModelCall]:
+    """Ask for exactly one object of `schema`, validated by the SDK.
+
+    This is why the planner and reviewer do not go through the CLI: their contract
+    is a shape, and a shape the API guarantees beats a shape a parser hopes for.
+    An invalid response raises here rather than becoming a half-populated plan the
+    orchestrator has to second-guess.
+    """
+    import anthropic
+
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise ModelError(
+            "ANTHROPIC_API_KEY is not set; put it in .env (gitignored) or the environment"
+        )
+
+    model = model or DEFAULT_MODEL
+    client = anthropic.Anthropic()
+    started = time.monotonic()
+
+    try:
+        response = client.messages.parse(
+            model=model,
+            max_tokens=max_tokens,
+            system=system,
+            messages=[{"role": "user", "content": prompt}],
+            output_format=schema,
+            thinking={"type": "adaptive"},
+        )
+    except anthropic.APIStatusError as exc:
+        raise ModelError(f"{model} returned {exc.status_code}: {exc.message}") from exc
+    except anthropic.APIConnectionError as exc:
+        raise ModelError(f"could not reach the API: {exc}") from exc
+
+    if response.stop_reason == "refusal":
+        detail = getattr(response.stop_details, "category", "unknown")
+        raise ModelError(f"{model} declined the request ({detail})")
+
+    parsed = response.parsed_output
+    if parsed is None:
+        raise ModelError(f"{model} returned no parseable {schema.__name__}")
+
+    usage = response.usage
+    tokens = {
+        "input": usage.input_tokens,
+        "output": usage.output_tokens,
+        "cache_read": getattr(usage, "cache_read_input_tokens", 0) or 0,
+        "cache_creation": getattr(usage, "cache_creation_input_tokens", 0) or 0,
+    }
+    call = ModelCall(
+        text=parsed.model_dump_json(),
+        model=model,
+        cost_usd=estimate_cost(model, tokens),
+        tokens=tokens,
+        num_turns=1,
+        duration_seconds=round(time.monotonic() - started, 2),
+        session_id=response.id,
+    )
+    return parsed, call
