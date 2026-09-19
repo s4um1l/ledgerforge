@@ -47,6 +47,11 @@ class ModelCall:
     permission_denials: list = field(default_factory=list)
 
     def metadata(self) -> dict:
+        """Everything the trace needs to account for this call.
+
+        Denials are recorded in full, not counted. What a sandboxed agent *tried*
+        to do is evidence about the boundary, and a count throws it away.
+        """
         return {
             "model": self.model,
             "cost_usd": self.cost_usd,
@@ -54,7 +59,13 @@ class ModelCall:
             "num_turns": self.num_turns,
             "duration_seconds": self.duration_seconds,
             "session_id": self.session_id,
-            "permission_denials": len(self.permission_denials),
+            "permission_denials": [
+                {
+                    "tool": denial.get("tool_name", "?"),
+                    "input": str(denial.get("tool_input", ""))[:400],
+                }
+                for denial in self.permission_denials
+            ],
         }
 
 
