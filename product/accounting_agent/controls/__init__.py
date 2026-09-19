@@ -17,7 +17,6 @@ from product.accounting_agent.controls import (
     consistency,
     cutoff,
     duplicates,
-    invoice_tolerance,
 )
 from product.accounting_agent.models import SEVERITY, Action, ControlVerdict
 
@@ -28,7 +27,6 @@ REGISTRY: list[Control] = [
     capitalization.check,
     cutoff.check,
     consistency.check,
-    invoice_tolerance.check,
 ]
 
 
