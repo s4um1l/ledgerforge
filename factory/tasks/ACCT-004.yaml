@@ -1,0 +1,55 @@
+id: ACCT-004
+
+title: Accrue late invoices for work performed inside the period
+
+source:
+  type: eval_failure
+  case_id: S02
+
+problem:
+  summary: >
+    The month-end cutoff control rejects any invoice dated after the period being
+    closed, looking only at the invoice date. Company policy says an invoice
+    dated after the cutoff for work performed inside the period is accrued, not
+    rejected. S02 is a staffing invoice dated 2026-10-03 for engineering work
+    completed 2026-09-30, with a signed statement of work and timesheets — and
+    the control rejects it. S04 is the same shape with the work performed in
+    October, and must keep being rejected.
+
+  actual_behavior: REJECT
+
+  expected_behavior: AUTO
+
+business_impact:
+  severity: high
+
+intent: >
+  Decide the cutoff on when the work was performed, not only on when the invoice
+  was written, so that legitimate accruals are not rejected.
+
+scope:
+  allowed_paths:
+    - product/accounting_agent/controls/**
+    - product/tests/**
+
+  forbidden_paths:
+    - benchmark/gold/**
+    - benchmark/cases/**
+    - benchmark/world/**
+    - evals/**
+    - config/**
+
+acceptance_criteria:
+  - An invoice dated after the cutoff whose service period falls inside the closing period is not rejected.
+  - An invoice dated after the cutoff whose work was also performed after the cutoff is still rejected.
+  - An invoice with no service period stated is still judged on its invoice date.
+  - S02 must pass and S04 must keep passing.
+  - All existing accounting regression tests must pass.
+
+verification:
+  commands:
+    - uv run pytest product/tests
+    - uv run python scripts/run_agent.py --out results/runs/verification.jsonl
+
+regression_policy:
+  max_new_failures: 0

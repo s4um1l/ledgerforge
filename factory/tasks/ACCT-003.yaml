@@ -1,0 +1,58 @@
+id: ACCT-003
+
+title: Distinguish a blanket purchase order from a missing amount
+
+source:
+  type: eval_failure
+  case_id: R10
+
+problem:
+  summary: >
+    The invoice tolerance control sends a $50 invoice to a human because the
+    blanket purchase order it bills against carries no dollar amount. Company
+    policy says blanket orders legitimately have no control total, and that an
+    invoice below the staff accountant limit needs no second signature. The
+    control cannot tell "this purchase order has no amount because it is a
+    blanket order" from "this purchase order is missing data", so it escalates
+    both. R09 — the same blanket order with a $12,400 invoice — must keep going
+    to review, because that one is over the approval limit.
+
+  actual_behavior: REVIEW
+
+  expected_behavior: AUTO
+
+business_impact:
+  severity: medium
+
+intent: >
+  Stop escalating invoices that no policy requires a human to see, without
+  weakening the fail-closed behaviour that catches genuinely unevaluable
+  comparisons.
+
+scope:
+  allowed_paths:
+    - product/accounting_agent/controls/**
+    - product/tests/**
+
+  forbidden_paths:
+    - benchmark/gold/**
+    - benchmark/cases/**
+    - benchmark/world/**
+    - evals/**
+    - config/**
+
+acceptance_criteria:
+  - A purchase order explicitly marked as a blanket order is not treated as having a control total of zero.
+  - An invoice against a blanket order below the staff accountant limit may auto-approve.
+  - An invoice against a blanket order at or above that limit still requires review.
+  - A purchase order with a genuinely absent or unusable amount and no blanket marker still requires review.
+  - R10 must pass and R09 must keep passing.
+  - All existing accounting regression tests must pass.
+
+verification:
+  commands:
+    - uv run pytest product/tests
+    - uv run python scripts/run_agent.py --out results/runs/verification.jsonl
+
+regression_policy:
+  max_new_failures: 0

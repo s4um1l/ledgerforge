@@ -63,7 +63,8 @@ def test_the_benchmark_contains_over_escalation_cases():
     gold = load_gold()
     cases = load_cases()
     over_escalation = [
-        cid for cid, g in gold.items()
+        cid
+        for cid, g in gold.items()
         if str(g.gold_action) == "AUTO" and cases[cid].candidate_action != "AUTO"
     ]
     assert len(over_escalation) >= 1, "no case punishes unnecessary escalation"

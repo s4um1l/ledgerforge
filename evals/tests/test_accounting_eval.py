@@ -47,7 +47,14 @@ def test_baseline_fixture_scores_24_of_32():
     )
     assert (suite.passed, suite.total) == (24, 32)
     assert {r.case_id for r in suite.failures} == {
-        "R03", "R05", "R07", "D05", "D07", "V02", "S03", "S06",
+        "R03",
+        "R05",
+        "R07",
+        "D05",
+        "D07",
+        "V02",
+        "S03",
+        "S06",
     }
     # Every failure is the same shape: automated when a human was required.
     assert all(r.actual is Action.AUTO for r in suite.failures)

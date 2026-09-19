@@ -1,0 +1,25 @@
+# Policy engine thresholds — how confident the system must be to act alone.
+#
+# These are OUR operating parameters, not the customer's accounting policy
+# (that lives in benchmark/world/policies.yaml). They are separate because the
+# automation/risk curve is produced by sweeping this file while the customer's
+# policy stays fixed.
+
+version: v0.1
+
+thresholds:
+  # Below this, the evidence is not good enough to act without a person.
+  evidence_sufficient_min: 0.90
+  # Above this, it looks enough like something already recorded to stop.
+  possible_duplicate_max: 0.85
+  # Below this, the proposed action is not clearly supported by policy.
+  candidate_supported_min: 0.95
+  # Above this, company policy is judged to require a human signature.
+  requires_human_review_max: 0.50
+  # Below this, the documents disagree with each other.
+  sources_consistent_min: 0.80
+
+# Threshold multipliers swept to produce the automation/risk curve. 1.0 is the
+# configuration above; lower values automate more and accept more risk.
+sweep:
+  strictness: [1.00, 0.95, 0.90, 0.80, 0.70, 0.60, 0.50, 0.30, 0.00]
