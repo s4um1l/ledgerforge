@@ -28,3 +28,4 @@
 {"case_id": "S06", "architecture": "jev_guard", "action": "AUTO", "latency_ms": 900, "cost_usd": 0.02}
 {"case_id": "S07", "architecture": "jev_guard", "action": "REVIEW", "latency_ms": 900, "cost_usd": 0.02}
 {"case_id": "S08", "architecture": "jev_guard", "action": "AUTO", "latency_ms": 900, "cost_usd": 0.02}
+{"case_id": "R09", "architecture": "jev_guard", "action": "AUTO", "latency_ms": 900, "cost_usd": 0.02}

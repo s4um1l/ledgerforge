@@ -37,7 +37,7 @@ def test_action_accepts_longer_spellings_from_fixtures():
     assert Action("human_review") is Action.REVIEW
 
 
-def test_baseline_fixture_scores_24_of_30():
+def test_baseline_fixture_scores_24_of_31():
     """The Phase 1 gate: a real number out of the evaluator, with no model involved."""
     suite = evaluate_suite(
         load_run(FIXTURES_DIR / "fake_run_baseline.jsonl"),
@@ -45,8 +45,10 @@ def test_baseline_fixture_scores_24_of_30():
         load_cases(),
         label="baseline",
     )
-    assert (suite.passed, suite.total) == (24, 30)
-    assert {r.case_id for r in suite.failures} == {"R03", "R07", "D05", "V02", "S03", "S06"}
+    assert (suite.passed, suite.total) == (24, 31)
+    assert {r.case_id for r in suite.failures} == {
+        "R03", "R07", "D05", "V02", "S03", "S06", "R09",
+    }
     # Every failure is the same shape: automated when a human was required.
     assert all(r.actual is Action.AUTO for r in suite.failures)
 
@@ -58,7 +60,7 @@ def test_incomplete_run_is_an_error_not_a_higher_score():
         evaluate_suite(trimmed, load_gold(), load_cases())
 
     suite = evaluate_suite(trimmed, load_gold(), load_cases(), require_complete=False)
-    assert suite.total == 28
+    assert suite.total == 29
 
 
 def test_unknown_case_is_rejected():

@@ -9,16 +9,19 @@ from collections import Counter
 from evals.gold import load_gold
 from evals.loaders import load_cases
 
+# R09 was added after the Phase 3 planner found a hole no case covered: a
+# purchase order carrying no amount. A defect with no case is a gap in the
+# benchmark, and closing it is human work — the factory may not edit these.
 EXPECTED_CATEGORIES = {
-    "reconciliation": 8,
+    "reconciliation": 9,
     "data_entry": 7,
     "variance": 7,
     "schedules": 8,
 }
 
 
-def test_thirty_cases():
-    assert len(load_cases()) == 30
+def test_case_count_matches_the_category_mix():
+    assert len(load_cases()) == sum(EXPECTED_CATEGORIES.values()) == 31
 
 
 def test_category_mix_matches_the_spec():

@@ -1,0 +1,21 @@
+{
+  "id": "R09",
+  "category": "reconciliation",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Blanket purchase order carrying no amount; a small invoice is matched to it.",
+  "input": {
+    "purchase_order": {
+      "number": "PO-1100",
+      "amount": 0.0,
+      "note": "blanket order, amount agreed per release"
+    },
+    "invoice": {
+      "number": "INV-8901",
+      "amount": 50.0,
+      "vendor": "Cloudspan"
+    },
+    "policy_ref": "invoice_tolerance"
+  },
+  "candidate_action": "AUTO"
+}

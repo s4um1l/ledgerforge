@@ -1,0 +1,52 @@
+id: ACCT-002
+
+title: Fail closed when a purchase order carries no amount
+
+source:
+  type: eval_failure
+  case_id: R09
+
+problem:
+  summary: >
+    The invoice tolerance control treats a purchase order amount of $0 as
+    satisfying the percentage test, so the only check left is the $100 absolute
+    cap. A $50 invoice against a blanket purchase order carrying no amount is
+    auto-approved with nothing having compared it to anything. The control's
+    silence is indistinguishable from approval.
+
+  actual_behavior: AUTO
+
+  expected_behavior: REVIEW
+
+business_impact:
+  severity: high
+
+intent: >
+  When the tolerance control cannot evaluate a purchase order against an
+  invoice, it must require review rather than stay silent.
+
+scope:
+  allowed_paths:
+    - product/accounting_agent/controls/**
+    - product/tests/**
+
+  forbidden_paths:
+    - benchmark/gold/**
+    - benchmark/cases/**
+    - evals/**
+
+acceptance_criteria:
+  - A purchase order amount of zero or less requires review, whatever the invoice amount.
+  - An invoice amount that is present but not a comparable number requires review.
+  - Cases with no purchase order at all remain untouched, since they are not three-way matches.
+  - Differences of $100 or less AND 1% or less against a real purchase order still auto-approve.
+  - R09 must pass.
+  - All existing accounting regression tests must pass.
+
+verification:
+  commands:
+    - uv run pytest product/tests
+    - uv run python scripts/run_agent.py --out results/runs/verification.jsonl
+
+regression_policy:
+  max_new_failures: 0
