@@ -1,0 +1,49 @@
+id: ACCT-001
+
+title: Enforce invoice tolerance policy
+
+source:
+  type: eval_failure
+  case_id: R07
+
+problem:
+  summary: >
+    The accounting agent automatically approved a $10,400 invoice against a
+    $10,000 purchase order. No control compares an invoice to the purchase
+    order it is matched against, so a 4% overbill was posted without a human
+    ever seeing it.
+
+  actual_behavior: AUTO
+
+  expected_behavior: REVIEW
+
+business_impact:
+  severity: high
+
+intent: >
+  Prevent invoices outside the configured customer tolerance from being
+  automatically approved.
+
+scope:
+  allowed_paths:
+    - product/accounting_agent/controls/**
+    - product/tests/**
+
+  forbidden_paths:
+    - benchmark/gold/**
+    - benchmark/cases/**
+    - evals/**
+
+acceptance_criteria:
+  - Differences of $100 or less AND 1% or less may auto-approve.
+  - Larger discrepancies must require review.
+  - R07 must pass.
+  - All existing accounting regression tests must pass.
+
+verification:
+  commands:
+    - uv run pytest product/tests
+    - uv run python scripts/run_agent.py --out results/runs/verification.jsonl
+
+regression_policy:
+  max_new_failures: 0
