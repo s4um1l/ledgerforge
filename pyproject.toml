@@ -1,0 +1,25 @@
+[project]
+name = "ledgerforge"
+version = "0.1.0"
+description = "A software factory that turns observed product failures into verified code changes — and an accounting agent for it to build."
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.9",
+    "pyyaml>=6.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.7",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["product/tests", "evals/tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

@@ -1,0 +1,21 @@
+# private spec + research notes — not tracked
+SPEC.md
+docs/jev.md
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# env / secrets
+.env
+.env.*
+
+# factory + eval output (keep the directories, ignore the contents)
+factory/traces/*
+!factory/traces/.gitkeep
+results/*
+!results/.gitkeep
