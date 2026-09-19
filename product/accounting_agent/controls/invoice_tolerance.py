@@ -53,8 +53,7 @@ def check(case_input: dict, proposed: Action) -> ControlVerdict | None:
     # no branch divides by zero or formats a non-number as currency.
     if po_amount is None:
         return _review(
-            f"purchase order {po_label} carries no amount; "
-            "cannot verify invoice against it"
+            f"purchase order {po_label} carries no amount; cannot verify invoice against it"
         )
     if not _comparable(po_amount):
         return _review(
