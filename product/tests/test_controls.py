@@ -258,6 +258,183 @@ def test_invoice_tolerance_limits_are_inclusive_at_the_boundary():
     )
 
 
+def test_invoice_tolerance_auto_approves_a_small_invoice_on_a_blanket_order():
+    """R10: a marked blanket order has no control total, and $50 needs no signature."""
+    assert (
+        invoice_tolerance.check(
+            {
+                "purchase_order": {"number": "PO-1100", "amount": 0.0, "blanket": True},
+                "invoice": {"number": "INV-8902", "amount": 50.0, "vendor": "Cloudspan"},
+            },
+            Action.AUTO,
+        )
+        is None
+    )
+
+
+def test_invoice_tolerance_reviews_a_large_invoice_on_a_blanket_order():
+    """R09: the blanket exemption is bounded by the approval limit."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1100", "amount": 0.0, "blanket": True},
+            "invoice": {"number": "INV-8901", "amount": 12400.0, "vendor": "Cloudspan"},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+    assert "approval limit" in verdict.reason
+
+
+def test_invoice_tolerance_blanket_limit_is_inclusive_at_the_boundary():
+    """At the limit requires review, not merely above it."""
+    limit = invoice_tolerance._approval_limit()
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1109", "amount": 0.0, "blanket": True},
+            "invoice": {"number": "INV-8910", "amount": limit},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_treats_an_absent_amount_on_a_blanket_order_like_zero():
+    """Once the marker is present, absence and zero are the same absence of a total."""
+    assert (
+        invoice_tolerance.check(
+            {
+                "purchase_order": {"number": "PO-1110", "blanket": True},
+                "invoice": {"number": "INV-8911", "amount": 50.0},
+            },
+            Action.AUTO,
+        )
+        is None
+    )
+
+
+def test_invoice_tolerance_does_not_exempt_a_blanket_order_claimed_only_in_prose():
+    """The explicit marker exempts; the free-text note does not."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {
+                "number": "PO-1111",
+                "amount": 0.0,
+                "note": "blanket order, amount agreed per release",
+            },
+            "invoice": {"number": "INV-8912", "amount": 50.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+@pytest.mark.parametrize("marker", ["true", "yes", 1, False])
+def test_invoice_tolerance_reviews_a_malformed_blanket_marker(marker):
+    """The marker check is a strict boolean identity, so anything else fails closed."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1112", "amount": 0.0, "blanket": marker},
+            "invoice": {"number": "INV-8913", "amount": 50.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_reviews_an_unparseable_amount_on_a_blanket_order():
+    """An amount we would have to parse stays unevaluable even on a blanket order."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1113", "amount": "TBD", "blanket": True},
+            "invoice": {"number": "INV-8914", "amount": 50.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_reviews_an_unparseable_invoice_on_a_blanket_order():
+    """The exemption never reaches arithmetic on an invoice figure we cannot verify."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1114", "amount": 0.0, "blanket": True},
+            "invoice": {"number": "INV-8915", "amount": "TBD"},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_still_compares_a_blanket_order_that_has_a_real_amount():
+    """The marker exempts a missing control total, not the tolerance test itself."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1115", "amount": 10000.0, "blanket": True},
+            "invoice": {"number": "INV-8916", "amount": 10400.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_auto_approves_a_blanket_order_with_a_real_amount_in_limits():
+    assert (
+        invoice_tolerance.check(
+            {
+                "purchase_order": {"number": "PO-1116", "amount": 10000.0, "blanket": True},
+                "invoice": {"number": "INV-8917", "amount": 10050.0},
+            },
+            Action.AUTO,
+        )
+        is None
+    )
+
+
+def test_the_staff_accountant_limit_straddles_the_two_blanket_cases():
+    """A policy edit that would silently flip R09 or R10 must fail loudly here."""
+    limit = invoice_tolerance._approval_limit()
+    assert limit is not None
+    assert 50.0 < limit <= 12400.0
+
+
+def test_apply_controls_leaves_the_small_blanket_invoice_on_auto():
+    """End-to-end at the control layer, on R10's full input."""
+    action, verdicts = apply_controls(
+        {
+            "purchase_order": {
+                "number": "PO-1100",
+                "vendor": "Cloudspan",
+                "amount": 0.0,
+                "blanket": True,
+                "note": "blanket order, amount agreed per release",
+            },
+            "invoice": {
+                "number": "INV-8902",
+                "vendor": "Cloudspan",
+                "amount": 50.0,
+                "date": "2026-09-26",
+                "description": "overage, 2 GB egress",
+            },
+            "ledger": {
+                "recent_postings": [
+                    {
+                        "document": "INV-8871",
+                        "party": "Cloudspan",
+                        "amount": 42.0,
+                        "date": "2026-08-27",
+                        "state": "posted",
+                    }
+                ]
+            },
+            "policy_ref": "review_requirements",
+            "period": "2026-09",
+        },
+        Action.AUTO,
+    )
+    assert action is Action.AUTO
+    assert verdicts == []
+
+
 def test_most_restrictive_verdict_wins():
     action, verdicts = apply_controls(
         {
