@@ -25,7 +25,7 @@ import sys
 import yaml
 
 from evals.gold import load_gold
-from evals.paths import REPO_ROOT, RESULTS_DIR
+from evals.paths import RESULTS_DIR
 from evals.schemas import Action as EvalAction
 from product.accounting_agent.judges.base import Judgments
 from product.accounting_agent.models import Action, ControlVerdict
@@ -127,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
     print(format_curve(curves))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(curves, indent=2) + "\n")
-    print(f"\nwritten to {args.out.relative_to(REPO_ROOT)}")
+    print(f"\nwritten to {args.out}")
     return 0
 
 
