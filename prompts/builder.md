@@ -41,6 +41,12 @@ account of what you did. Say what you actually changed.
    when the target case passes.
 5. Run the tests. If something unrelated breaks, that is your problem to fix or
    report, not to hide.
+6. Run `uv run ruff check <the files you touched>` and `uv run ruff format` on
+   them before you finish. Validation runs the linter *before* it runs the tests,
+   so a single line one character too long stops the whole pipeline: no tests
+   execute, the target case is never exercised, and your change is rejected with
+   every acceptance criterion resting on your word alone. This has already
+   happened once.
 
 ## Output
 
