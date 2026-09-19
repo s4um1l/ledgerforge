@@ -141,6 +141,11 @@ def build_with_claude_code(item: WorkItem, plan: Plan, context: ContextPackage) 
     except Exception as exc:
         raise BuildError(f"builder output does not match the contract: {exc}") from exc
 
+    # Models report their own work loosely — a created file often appears only in
+    # `created_files`. Normalise rather than complain: the self-report feeds the
+    # revert path, while scope is checked from the git diff regardless.
+    result.changed_files = sorted(set(result.changed_files) | set(result.created_files))
+
     print(
         f"  builder: {call.num_turns} turns, {call.duration_seconds}s, "
         f"${call.cost_usd:.4f} list-price equivalent"

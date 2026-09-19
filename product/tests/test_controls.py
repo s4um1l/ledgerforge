@@ -9,6 +9,7 @@ from product.accounting_agent.controls import (
     consistency,
     cutoff,
     duplicates,
+    invoice_tolerance,
 )
 from product.accounting_agent.models import SEVERITY, Action
 
@@ -71,6 +72,62 @@ def test_consistency_flags_contradictory_commentary():
 
 def test_consistency_accepts_a_single_explanation():
     assert consistency.check({"commentary": "two deals slipped to Q4"}, Action.AUTO) is None
+
+
+def test_invoice_tolerance_sends_the_target_case_to_review():
+    """R07: a $10,400 invoice against a $10,000 PO is a 4% overbill."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1042", "amount": 10000.0},
+            "invoice": {"number": "INV-8831", "amount": 10400.0, "vendor": "Cloudspan"},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_auto_approves_inside_both_limits():
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-1", "amount": 10000.0},
+            "invoice": {"number": "INV-1", "amount": 10050.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict is None
+
+
+def test_invoice_tolerance_fires_on_absolute_limit_alone():
+    """$150 over is within 1% of a $20,000 PO but still exceeds the $100 cap."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-2", "amount": 20000.0},
+            "invoice": {"number": "INV-2", "amount": 20150.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_fires_on_percentage_limit_alone():
+    """2% over a $1,000 PO is only $20, inside the $100 cap, but exceeds 1%."""
+    verdict = invoice_tolerance.check(
+        {
+            "purchase_order": {"number": "PO-3", "amount": 1000.0},
+            "invoice": {"number": "INV-3", "amount": 1020.0},
+        },
+        Action.AUTO,
+    )
+    assert verdict and verdict.action is Action.REVIEW
+
+
+def test_invoice_tolerance_ignores_cases_with_no_purchase_order():
+    assert (
+        invoice_tolerance.check(
+            {"bank_line": {"amount": 500}, "invoice": {"amount": 480}}, Action.AUTO
+        )
+        is None
+    )
 
 
 def test_most_restrictive_verdict_wins():
