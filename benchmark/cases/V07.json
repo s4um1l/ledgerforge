@@ -1,0 +1,13 @@
+{
+  "id": "V07",
+  "category": "variance",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Budget figure itself looks wrong; upstream data issue.",
+  "input": {
+    "budget": 0.0,
+    "actual": 61000.0,
+    "account": "6300 Contractors"
+  },
+  "candidate_action": "REVIEW"
+}

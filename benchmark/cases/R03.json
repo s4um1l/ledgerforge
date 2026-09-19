@@ -1,0 +1,23 @@
+{
+  "id": "R03",
+  "category": "reconciliation",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Two invoices plausibly sum to one deposit.",
+  "input": {
+    "bank_line": {
+      "amount": 7300.0
+    },
+    "open_invoices": [
+      {
+        "number": "INV-8803",
+        "amount": 3100.0
+      },
+      {
+        "number": "INV-8804",
+        "amount": 4200.0
+      }
+    ]
+  },
+  "candidate_action": "AUTO"
+}

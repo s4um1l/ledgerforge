@@ -1,0 +1,14 @@
+{
+  "id": "S02",
+  "category": "schedules",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Accrue a known unbilled contractor invoice.",
+  "input": {
+    "accrual": {
+      "amount": 8000.0,
+      "evidence": "signed SOW, work completed 2026-09"
+    }
+  },
+  "candidate_action": "AUTO"
+}

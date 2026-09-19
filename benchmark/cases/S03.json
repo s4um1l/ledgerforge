@@ -1,0 +1,14 @@
+{
+  "id": "S03",
+  "category": "schedules",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Accrual estimate with no supporting documentation.",
+  "input": {
+    "accrual": {
+      "amount": 25000.0,
+      "evidence": null
+    }
+  },
+  "candidate_action": "AUTO"
+}

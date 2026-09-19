@@ -1,0 +1,16 @@
+{
+  "id": "V05",
+  "category": "variance",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Two conflicting explanations for the same variance.",
+  "input": {
+    "budget": 30000.0,
+    "actual": 44000.0,
+    "commentary": [
+      "vendor price increase",
+      "timing only, reverses next month"
+    ]
+  },
+  "candidate_action": "AUTO"
+}

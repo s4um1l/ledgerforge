@@ -1,0 +1,18 @@
+{
+  "id": "R08",
+  "category": "reconciliation",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Duplicate vendor invoice submitted twice in one week.",
+  "input": {
+    "invoice": {
+      "number": "INV-8840",
+      "amount": 1250.0,
+      "vendor": "Brightline"
+    },
+    "ledger": {
+      "INV-8840": "posted 2026-09-02"
+    }
+  },
+  "candidate_action": "REVIEW"
+}

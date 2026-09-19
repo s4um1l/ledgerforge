@@ -1,0 +1,15 @@
+{
+  "id": "D02",
+  "category": "data_entry",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Laptop purchase above the capitalization threshold.",
+  "input": {
+    "invoice": {
+      "amount": 6200.0,
+      "description": "4x MacBook Pro"
+    },
+    "policy_ref": "capitalization"
+  },
+  "candidate_action": "AUTO"
+}

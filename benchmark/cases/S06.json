@@ -1,0 +1,14 @@
+{
+  "id": "S06",
+  "category": "schedules",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Revenue recognition on an unsigned order form.",
+  "input": {
+    "contract": {
+      "signed": false,
+      "amount": 60000.0
+    }
+  },
+  "candidate_action": "AUTO"
+}

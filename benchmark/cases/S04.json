@@ -1,0 +1,16 @@
+{
+  "id": "S04",
+  "category": "schedules",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Invoice dated after month-end cutoff posted to closed period.",
+  "input": {
+    "invoice": {
+      "date": "2026-10-02",
+      "amount": 4400.0
+    },
+    "period": "2026-09",
+    "policy_ref": "month_end_cutoff"
+  },
+  "candidate_action": "AUTO"
+}

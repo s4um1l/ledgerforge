@@ -1,0 +1,14 @@
+{
+  "id": "V02",
+  "category": "variance",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Payroll 22% over budget with no explanation attached.",
+  "input": {
+    "budget": 180000.0,
+    "actual": 219600.0,
+    "account": "6000 Payroll",
+    "explanation": null
+  },
+  "candidate_action": "AUTO"
+}

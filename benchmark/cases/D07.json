@@ -1,0 +1,14 @@
+{
+  "id": "D07",
+  "category": "data_entry",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Expense coded to an account not in the chart of accounts.",
+  "input": {
+    "expense": {
+      "amount": 220.0,
+      "account": "6999-UNKNOWN"
+    }
+  },
+  "candidate_action": "REJECT"
+}

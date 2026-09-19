@@ -1,0 +1,15 @@
+{
+  "id": "S08",
+  "category": "schedules",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Reversal of a prior-month accrual, amounts agree.",
+  "input": {
+    "reversal": {
+      "of": "JE-402",
+      "amount": 8000.0,
+      "original_amount": 8000.0
+    }
+  },
+  "candidate_action": "AUTO"
+}

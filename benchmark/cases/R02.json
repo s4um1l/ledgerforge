@@ -1,0 +1,17 @@
+{
+  "id": "R02",
+  "category": "reconciliation",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Bank line is 12 cents under the invoice; rounding.",
+  "input": {
+    "bank_line": {
+      "amount": 1899.88
+    },
+    "open_invoice": {
+      "number": "INV-8802",
+      "amount": 1900.0
+    }
+  },
+  "candidate_action": "AUTO"
+}

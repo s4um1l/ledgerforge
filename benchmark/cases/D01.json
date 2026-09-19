@@ -1,0 +1,15 @@
+{
+  "id": "D01",
+  "category": "data_entry",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Clean SaaS subscription invoice, mapped account obvious.",
+  "input": {
+    "invoice": {
+      "amount": 299.0,
+      "vendor": "Figma",
+      "description": "monthly design seats"
+    }
+  },
+  "candidate_action": "AUTO"
+}

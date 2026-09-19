@@ -1,0 +1,13 @@
+{
+  "id": "V03",
+  "category": "variance",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Revenue under plan, sales commentary attached and consistent.",
+  "input": {
+    "budget": 420000.0,
+    "actual": 388000.0,
+    "commentary": "two enterprise deals slipped to Q4"
+  },
+  "candidate_action": "AUTO"
+}

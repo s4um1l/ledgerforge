@@ -51,4 +51,20 @@ uv run python -m factory.run factory/tasks/ACCT-001.yaml
 
 ## Status
 
-Phase 0 — repository skeleton.
+**Phase 1 — evaluator built, before the product exists.**
+
+```bash
+uv run python -m evals.accounting_eval
+# fake_run_baseline  [llm_only]
+#   24/30 cases correct   (80.0%)
+#   autonomous error rate    33.3%   <- primary
+
+uv run python -m evals.accounting_eval \
+    evals/fixtures/fake_run_patched.jsonl --against evals/fixtures/fake_run_baseline.jsonl
+# 24/30  ->  27/30      newly passing D05, R07, V02      REGRESSIONS (none)
+```
+
+`benchmark/` currently holds a **v0.0 scaffold**: 30 shape-correct cases in the 8/7/7/8 category
+mix, with gold answers. Phase 4 replaces it with the frozen v0.1 benchmark. The run files under
+`evals/fixtures/` are simulated agent output, which is the point — the evaluator produced a real
+24/30 with no model in the loop.

@@ -1,0 +1,18 @@
+{
+  "id": "R01",
+  "category": "reconciliation",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Bank line matches a single open invoice exactly.",
+  "input": {
+    "bank_line": {
+      "amount": 4200.0,
+      "memo": "ACH NORTHWIND"
+    },
+    "open_invoice": {
+      "number": "INV-8801",
+      "amount": 4200.0
+    }
+  },
+  "candidate_action": "AUTO"
+}

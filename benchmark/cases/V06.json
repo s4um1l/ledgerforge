@@ -1,0 +1,13 @@
+{
+  "id": "V06",
+  "category": "variance",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Variance driven by a reclass already approved by the controller.",
+  "input": {
+    "budget": 12000.0,
+    "actual": 0.0,
+    "commentary": "reclassed to 6210 per approved JE-441"
+  },
+  "candidate_action": "AUTO"
+}

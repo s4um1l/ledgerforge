@@ -1,0 +1,14 @@
+{
+  "id": "S05",
+  "category": "schedules",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Deferred revenue release for a completed milestone.",
+  "input": {
+    "contract": {
+      "milestone": "phase 2 accepted 2026-09-14",
+      "amount": 45000.0
+    }
+  },
+  "candidate_action": "AUTO"
+}

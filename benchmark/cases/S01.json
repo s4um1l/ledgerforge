@@ -1,0 +1,15 @@
+{
+  "id": "S01",
+  "category": "schedules",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Straight-line prepaid amortization, month 4 of 12.",
+  "input": {
+    "prepaid": {
+      "total": 12000.0,
+      "months": 12,
+      "month_index": 4
+    }
+  },
+  "candidate_action": "AUTO"
+}

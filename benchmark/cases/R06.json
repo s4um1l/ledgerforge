@@ -1,0 +1,18 @@
+{
+  "id": "R06",
+  "category": "reconciliation",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Customer short-paid, remittance advice explains why.",
+  "input": {
+    "bank_line": {
+      "amount": 4000.0
+    },
+    "open_invoice": {
+      "number": "INV-8806",
+      "amount": 4500.0
+    },
+    "remittance": "500 credit memo CM-31 applied"
+  },
+  "candidate_action": "AUTO"
+}

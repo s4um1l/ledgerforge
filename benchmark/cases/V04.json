@@ -1,0 +1,13 @@
+{
+  "id": "V04",
+  "category": "variance",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Cost of revenue variance explained by a one-time migration.",
+  "input": {
+    "budget": 90000.0,
+    "actual": 118000.0,
+    "commentary": "datacenter migration, non-recurring"
+  },
+  "candidate_action": "REVIEW"
+}

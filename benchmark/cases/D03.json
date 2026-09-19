@@ -1,0 +1,15 @@
+{
+  "id": "D03",
+  "category": "data_entry",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Annual insurance premium paid upfront; prepaid treatment.",
+  "input": {
+    "invoice": {
+      "amount": 18000.0,
+      "period": "2026-10-01..2027-09-30",
+      "description": "D&O insurance"
+    }
+  },
+  "candidate_action": "REVIEW"
+}

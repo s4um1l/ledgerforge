@@ -1,0 +1,17 @@
+{
+  "id": "R05",
+  "category": "reconciliation",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Same invoice number already cleared last month.",
+  "input": {
+    "bank_line": {
+      "amount": 2400.0,
+      "memo": "ACH INV-8790"
+    },
+    "ledger": {
+      "INV-8790": "cleared 2026-07-31"
+    }
+  },
+  "candidate_action": "AUTO"
+}

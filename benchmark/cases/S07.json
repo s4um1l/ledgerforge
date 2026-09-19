@@ -1,0 +1,15 @@
+{
+  "id": "S07",
+  "category": "schedules",
+  "benchmark_version": "v0.0-scaffold",
+  "scaffold": true,
+  "summary": "Depreciation on an asset below the capitalization threshold.",
+  "input": {
+    "asset": {
+      "cost": 2400.0,
+      "useful_life_months": 36
+    },
+    "policy_ref": "capitalization"
+  },
+  "candidate_action": "REVIEW"
+}
